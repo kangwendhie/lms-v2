@@ -251,3 +251,68 @@ export function filterNotificationsByRole(
   return { items, unreadCount };
 }
 
+export interface AuthAccount {
+  username: string;
+  password: string;
+  email: string;
+  nisn?: string;
+  nip?: string;
+  role: 'siswa' | 'guru' | 'admin';
+  name: string;
+}
+
+/**
+ * Validasi kredensial login pengguna berdasarkan username, email, NISN, atau NIP
+ */
+export function authenticateUser(
+  identifier: string,
+  password: string,
+  accounts: Record<string, AuthAccount>
+): {
+  success: boolean;
+  role?: 'siswa' | 'guru' | 'admin';
+  user?: AuthAccount;
+  message: string;
+} {
+  const cleanId = identifier.trim().toLowerCase();
+  const cleanPass = password.trim();
+
+  if (!cleanId || !cleanPass) {
+    return {
+      success: false,
+      message: 'Username dan password wajib diisi.',
+    };
+  }
+
+  const accountList = Object.values(accounts);
+  const matched = accountList.find(
+    (acc) =>
+      acc.username.toLowerCase() === cleanId ||
+      acc.email.toLowerCase() === cleanId ||
+      (acc.nisn && acc.nisn.toLowerCase() === cleanId) ||
+      (acc.nip && acc.nip.toLowerCase() === cleanId)
+  );
+
+  if (!matched) {
+    return {
+      success: false,
+      message: 'Akun tidak ditemukan. Gunakan username: siswa, guru, atau admin.',
+    };
+  }
+
+  if (matched.password !== cleanPass) {
+    return {
+      success: false,
+      message: `Password salah untuk akun @${matched.username}. Silakan periksa daftar kredensial.`,
+    };
+  }
+
+  return {
+    success: true,
+    role: matched.role,
+    user: matched,
+    message: `Berhasil masuk sebagai ${matched.name} (${matched.role.toUpperCase()}).`,
+  };
+}
+
+

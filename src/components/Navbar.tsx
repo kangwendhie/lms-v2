@@ -3,10 +3,6 @@ import { UserRole, UserProfile, InAppNotification } from '../types/lms';
 import { filterNotificationsByRole } from '../utils/lmsLogic';
 import { 
   GraduationCap, 
-  UserCheck, 
-  ShieldCheck, 
-  BookOpen, 
-  Server, 
   Menu, 
   X, 
   Bell,
@@ -14,13 +10,13 @@ import {
   Award,
   FolderGit2,
   Clock,
-  CheckCircle2
+  KeyRound,
+  LogOut
 } from 'lucide-react';
 
 interface NavbarProps {
   currentUser: UserProfile;
   currentRole: UserRole;
-  onRoleChange: (role: UserRole) => void;
   onSelectNav: (nav: string) => void;
   activeNav: string;
   isMobileMenuOpen: boolean;
@@ -28,12 +24,13 @@ interface NavbarProps {
   notifications: InAppNotification[];
   onMarkNotificationRead: (id: string) => void;
   onMarkAllNotificationsRead: () => void;
+  onOpenAuthModal: () => void;
+  onLogout: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   currentRole,
-  onRoleChange,
   onSelectNav,
   activeNav,
   isMobileMenuOpen,
@@ -41,6 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   notifications,
   onMarkNotificationRead,
   onMarkAllNotificationsRead,
+  onOpenAuthModal,
+  onLogout,
 }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifContainerRef = useRef<HTMLDivElement>(null);
@@ -137,54 +136,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Right Action: Role Switcher, Notification Bell & User Avatar */}
+          {/* Right Action: Notification Bell & User Profile */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Quick Role Switcher Pill */}
-            <div className="flex items-center bg-slate-100 p-0.5 sm:p-1 rounded-xl border border-slate-200">
-              <span className="text-[11px] font-medium text-slate-700 px-2 hidden md:inline">
-                Peran:
-              </span>
-              <button
-                onClick={() => onRoleChange('siswa')}
-                className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1 cursor-pointer ${
-                  currentRole === 'siswa'
-                    ? 'bg-white text-indigo-600 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-                aria-label="Ganti ke peran Siswa"
-                title="Peran Siswa"
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Siswa</span>
-              </button>
-              <button
-                onClick={() => onRoleChange('guru')}
-                className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1 cursor-pointer ${
-                  currentRole === 'guru'
-                    ? 'bg-white text-emerald-600 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-                aria-label="Ganti ke peran Guru"
-                title="Peran Guru"
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Guru</span>
-              </button>
-              <button
-                onClick={() => onRoleChange('admin')}
-                className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1 cursor-pointer ${
-                  currentRole === 'admin'
-                    ? 'bg-white text-purple-600 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-                aria-label="Ganti ke peran Admin"
-                title="Peran Admin"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Admin</span>
-              </button>
-            </div>
-
             {/* In-App Notification Center Dropdown */}
             <div className="relative" ref={notifContainerRef}>
               <button
@@ -312,21 +265,41 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* User Profile Mini Badge (Desktop) */}
-            <div className="hidden md:flex items-center space-x-2.5 pl-2 border-l border-slate-200">
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-100"
-              />
-              <div className="text-left">
-                <div className="text-xs font-bold text-slate-800 leading-tight">
-                  {currentUser.name}
-                </div>
-                <div className="text-[10px] text-slate-700 capitalize">
-                  {currentUser.role} {currentUser.kelasId ? '• XII RPL 1' : ''}
+            {/* User Profile Mini Badge & Auth Buttons */}
+            <div className="flex items-center space-x-2 pl-2 border-l border-slate-200 shrink-0">
+              <button
+                onClick={onOpenAuthModal}
+                className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition-colors cursor-pointer whitespace-nowrap"
+                title="Lihat daftar username & password atau ganti akun"
+              >
+                <KeyRound className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">Akun & Login</span>
+              </button>
+
+              <div className="hidden md:flex items-center space-x-2 pl-1 shrink-0">
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-100 shrink-0"
+                />
+                <div className="text-left whitespace-nowrap">
+                  <div className="text-xs font-bold text-slate-800 leading-tight">
+                    {currentUser.name.split(',')[0]}
+                  </div>
+                  <div className="text-[10px] text-slate-700 font-mono">
+                    @{currentUser.username} &bull; <span className="font-sans">{currentUser.jabatan}</span>
+                  </div>
                 </div>
               </div>
+
+              <button
+                onClick={onLogout}
+                className="p-2 rounded-xl border border-slate-200 hover:bg-rose-50 hover:border-rose-200 text-slate-600 hover:text-rose-600 transition-colors cursor-pointer shrink-0"
+                title="Keluar / Tampilkan Halaman Login"
+                aria-label="Keluar dari sesi saat ini"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Mobile Hamburger Button */}

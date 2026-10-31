@@ -2,9 +2,12 @@ export type UserRole = 'siswa' | 'guru' | 'admin';
 
 export interface UserProfile {
   id: string;
+  username: string;
+  password: string;
   name: string;
   email: string;
   role: UserRole;
+  jabatan: string;
   avatar: string;
   nisn?: string;
   nip?: string;

@@ -15,12 +15,15 @@ import { CbtExamView } from './components/CbtExamView';
 import { PresensiJurnal } from './components/PresensiJurnal';
 import { PklMonitoring } from './components/PklMonitoring';
 import { AdminMasterData } from './components/AdminMasterData';
+import { AuthPortalModal } from './components/AuthPortalModal';
 import { BellRing, X } from 'lucide-react';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('siswa');
   const [activeNav, setActiveNav] = useState<string>('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
   // Core application reactive state
   const [materiList, setMateriList] = useState<Materi[]>(MOCK_MATERI);
@@ -140,13 +143,40 @@ export default function App() {
     );
   };
 
+  const handleLoginSuccess = (role: UserRole) => {
+    setCurrentRole(role);
+    setIsLoggedIn(true);
+    setIsAuthModalOpen(false);
+    const user = MOCK_USERS[role];
+    triggerToast({
+      id: `notif_login_${Date.now()}`,
+      targetRole: role,
+      tipe: 'info',
+      judul: `Login Berhasil (@${user.username})`,
+      pesan: `Selamat datang kembali, ${user.name} (${user.jabatan}).`,
+      waktu: 'Baru saja',
+      dibaca: true,
+      targetNav: 'dashboard',
+    });
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <AuthPortalModal
+        isOpen={true}
+        isFullScreenLogin={true}
+        currentRole={currentRole}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
       {/* Sticky Header Navbar */}
       <Navbar
         currentUser={currentUser}
         currentRole={currentRole}
-        onRoleChange={(role) => setCurrentRole(role)}
         onSelectNav={(nav) => setActiveNav(nav)}
         activeNav={activeNav}
         isMobileMenuOpen={isMobileMenuOpen}
@@ -154,6 +184,16 @@ export default function App() {
         notifications={notifications}
         onMarkNotificationRead={handleMarkNotificationRead}
         onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onLogout={() => setIsLoggedIn(false)}
+      />
+
+      {/* Modal Akun & Login */}
+      <AuthPortalModal
+        isOpen={isAuthModalOpen}
+        currentRole={currentRole}
+        onLoginSuccess={handleLoginSuccess}
+        onClose={() => setIsAuthModalOpen(false)}
       />
 
       {/* In-App Real-Time Toast Banner */}

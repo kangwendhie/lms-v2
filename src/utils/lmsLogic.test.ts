@@ -8,6 +8,8 @@ import {
   createTaskGradedNotification,
   createTaskSubmittedNotification,
   filterNotificationsByRole,
+  authenticateUser,
+  AuthAccount,
   Question,
   AttendanceRecord,
   PklLogbookItem,
@@ -137,4 +139,61 @@ test('in-app notifications are created and filtered accurately by role', () => {
   assert.equal(guruView.items.length, 1);
   assert.equal(guruView.unreadCount, 1);
 });
+
+test('authenticateUser validates credentials for siswa, guru, and admin roles', () => {
+  const accounts: Record<string, AuthAccount> = {
+    siswa: {
+      username: 'siswa',
+      password: 'siswa123',
+      email: 'budi.santoso@smk.sch.id',
+      nisn: '0068472910',
+      role: 'siswa',
+      name: 'Budi Santoso',
+    },
+    guru: {
+      username: 'guru',
+      password: 'guru123',
+      email: 'hendra.wijaya@smk.sch.id',
+      nip: '198403152008011003',
+      role: 'guru',
+      name: 'Hendra Wijaya, S.Kom., M.T.',
+    },
+    admin: {
+      username: 'admin',
+      password: 'admin123',
+      email: 'kurikulum@smk.sch.id',
+      nip: '197906202005012004',
+      role: 'admin',
+      name: 'Siti Rahmawati, S.Pd.',
+    },
+  };
+
+  // Valid login via username
+  const resSiswa = authenticateUser('siswa', 'siswa123', accounts);
+  assert.equal(resSiswa.success, true);
+  assert.equal(resSiswa.role, 'siswa');
+
+  // Valid login via NISN
+  const resNisn = authenticateUser('0068472910', 'siswa123', accounts);
+  assert.equal(resNisn.success, true);
+  assert.equal(resNisn.role, 'siswa');
+
+  // Valid login for guru & admin
+  const resGuru = authenticateUser('guru', 'guru123', accounts);
+  assert.equal(resGuru.success, true);
+  assert.equal(resGuru.role, 'guru');
+
+  const resAdmin = authenticateUser('admin', 'admin123', accounts);
+  assert.equal(resAdmin.success, true);
+  assert.equal(resAdmin.role, 'admin');
+
+  // Invalid password
+  const resWrongPass = authenticateUser('guru', 'salah123', accounts);
+  assert.equal(resWrongPass.success, false);
+
+  // Unknown username
+  const resUnknown = authenticateUser('tidakada', 'siswa123', accounts);
+  assert.equal(resUnknown.success, false);
+});
+
 

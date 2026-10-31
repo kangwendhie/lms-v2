@@ -1,6 +1,6 @@
 import React from 'react';
-import { UserProfile, UserRole, Jurusan } from '../types/lms';
-import { MOCK_JURUSAN, MOCK_MATERI, MOCK_TUGAS, MOCK_CBT_EXAM, MOCK_PKL_DATA } from '../data/mockData';
+import { UserProfile, UserRole } from '../types/lms';
+import { MOCK_JURUSAN, MOCK_MATERI, MOCK_CBT_EXAM, MOCK_PKL_DATA } from '../data/mockData';
 import { 
   BookOpen, 
   FileCheck2, 
@@ -9,14 +9,12 @@ import {
   ArrowUpRight, 
   Clock, 
   CheckCircle2, 
-  AlertCircle, 
   Code2, 
   Network, 
   Palette, 
   Wrench, 
   Calculator, 
   Users, 
-  Server,
   Sparkles,
   Award
 } from 'lucide-react';
