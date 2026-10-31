@@ -1,0 +1,6 @@
+{
+  "name": "EduSMK - LMS Sekolah Menengah Kejuruan Modern",
+  "description": "Platform Learning Management System (LMS) modern dan responsive khusus SMK dengan Kurikulum Merdeka, modul kejuruan, CBT interaktif, jurnal mengajar, dan monitoring PKL.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
